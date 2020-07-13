@@ -1,0 +1,987 @@
+<html>
+<head>
+<title>App.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc9900; font-weight: bold;}
+.s1 { color: #9bc28e;}
+.s2 { color: #9bc28e; font-weight: bold;}
+.s3 { color: #ffffff; font-weight: bold;}
+.s4 { color: #00b580; font-weight: bold;}
+.s5 { color: #cc7832;}
+.s6 { color: #f971bb;}
+.s7 { color: #97e85a; font-weight: bold;}
+.s8 { color: #ff6666;}
+</style>
+</head>
+<body bgcolor="#404040">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+App.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">os</span>
+<span class="s0">from </span><span class="s1">Cards </span><span class="s0">import </span><span class="s1">NewHand</span>
+<span class="s0">from </span><span class="s1">Players </span><span class="s0">import </span><span class="s1">Player</span>
+<span class="s0">from </span><span class="s1">time </span><span class="s0">import </span><span class="s1">sleep</span>
+
+
+<span class="s0">def </span><span class="s1">clear_screen</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">_ </span><span class="s3">= </span><span class="s1">os.system</span><span class="s2">(</span><span class="s4">'cls' </span><span class="s0">if </span><span class="s1">os.name </span><span class="s3">== </span><span class="s4">'nt' </span><span class="s0">else </span><span class="s4">'clear'</span><span class="s2">)</span>
+
+
+<span class="s1">player1_name </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">'Enter the name for Player1: '</span><span class="s2">)</span><span class="s1">.title</span><span class="s2">()</span>
+<span class="s1">player2_name </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">'Enter the name for Player2: '</span><span class="s2">)</span><span class="s1">.title</span><span class="s2">()</span>
+
+<span class="s1">player1 </span><span class="s3">= </span><span class="s1">Player</span><span class="s2">(</span><span class="s1">player1_name</span><span class="s2">)</span>
+<span class="s1">player2 </span><span class="s3">= </span><span class="s1">Player</span><span class="s2">(</span><span class="s1">player2_name</span><span class="s2">)</span>
+
+
+<span class="s0">def </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">s</span><span class="s3">: </span><span class="s1">str</span><span class="s5">, </span><span class="s1">allowed</span><span class="s3">: </span><span class="s1">list</span><span class="s2">)</span><span class="s3">:</span>
+    <span class="s0">if </span><span class="s1">s </span><span class="s0">in </span><span class="s1">allowed</span><span class="s3">:</span>
+        <span class="s0">return True</span>
+    else<span class="s3">:</span>
+        <span class="s0">return False</span>
+
+
+def <span class="s1">dealer_preflop_raise</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">minimum_raise </span><span class="s3">= </span><span class="s2">(</span><span class="s6">2 </span><span class="s3">* </span><span class="s2">(</span><span class="s1">hand.bb.put_in_pot_pre </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_pre</span><span class="s2">))</span>
+
+    <span class="s0">try</span><span class="s3">:</span>
+        <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">float</span><span class="s2">(</span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'How much would you like to raise to? (Stack = </span><span class="s7">{</span><span class="s1">hand.dealer.stack</span><span class="s7">}</span><span class="s4">): $'</span><span class="s2">))</span>
+        <span class="s0">if </span><span class="s1">raisesize </span><span class="s3">&gt;= </span><span class="s1">hand.dealer.stack </span><span class="s3">+ </span><span class="s1">hand.dealer.put_in_pot_pre</span><span class="s3">:  </span><span class="s8"># if bet constitutes all (or more than all) the</span>
+            <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">hand.dealer.stack </span><span class="s3">+ </span><span class="s1">hand.dealer.put_in_pot_pre   </span><span class="s8"># chips that a player has, sets them all in.</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_pre           </span><span class="s8"># Also ensures that if they bet more than they have</span>
+            <span class="s1">hand.dealer.put_in_pot_pre </span><span class="s3">= </span><span class="s1">raisesize                       </span><span class="s8"># that only the chips they have are added to the</span>
+            <span class="s1">hand.dealer.all_in </span><span class="s3">= </span><span class="s0">True                                    </span><span class="s8"># pot.</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">is all in!'</span><span class="s2">)</span>
+            <span class="s1">hand.dealer.stack </span><span class="s3">= </span><span class="s6">0.00</span>
+        <span class="s0">elif </span><span class="s1">raisesize </span><span class="s3">&lt; </span><span class="s1">minimum_raise </span><span class="s0">and not </span><span class="s1">hand.dealer.all_in</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'You must raise to at least $</span><span class="s7">{</span><span class="s1">minimum_raise</span><span class="s7">}</span><span class="s4">!'</span><span class="s2">)</span>
+            <span class="s1">dealer_preflop_raise</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:  </span><span class="s8"># adjusts the stacks and pot for normal case</span>
+            <span class="s1">hand.dealer.stack </span><span class="s3">-= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_pre</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_pre</span>
+            hand.dealer.put_in_pot_pre <span class="s3">= </span><span class="s1">raisesize</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">raises to $</span><span class="s7">{</span><span class="s1">raisesize</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s0">except </span><span class="s1">ValueError</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">'Please enter a valid bet size.'</span><span class="s2">)</span>
+        <span class="s1">dealer_preflop_raise</span><span class="s2">()</span>
+
+
+<span class="s0">def </span><span class="s1">bb_preflop_raise</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">minimum_raise </span><span class="s3">= </span><span class="s2">(</span><span class="s6">2 </span><span class="s3">* </span><span class="s2">(</span><span class="s1">hand.dealer.put_in_pot_pre </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_pre</span><span class="s2">))</span>
+
+    <span class="s0">try</span><span class="s3">:</span>
+        <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">float</span><span class="s2">(</span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'How much would you like to raise to? (Stack = </span><span class="s7">{</span><span class="s1">hand.bb.stack</span><span class="s7">}</span><span class="s4">): $'</span><span class="s2">))</span>
+        <span class="s0">if </span><span class="s1">raisesize </span><span class="s3">&gt;= </span><span class="s1">hand.bb.stack </span><span class="s3">+ </span><span class="s1">hand.bb.put_in_pot_pre</span><span class="s3">:</span>
+            <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">hand.bb.stack </span><span class="s3">+ </span><span class="s1">hand.bb.put_in_pot_pre</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize</span>
+            hand.bb.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">is all in!'</span><span class="s2">)</span>
+            <span class="s1">hand.bb.stack </span><span class="s3">= </span><span class="s6">0.00</span>
+        <span class="s0">elif </span><span class="s1">raisesize </span><span class="s3">&lt; </span><span class="s1">minimum_raise</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'You must raise to at least $</span><span class="s7">{</span><span class="s1">minimum_raise</span><span class="s7">}</span><span class="s4">!'</span><span class="s2">)</span>
+            <span class="s1">bb_preflop_raise</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">hand.bb.stack </span><span class="s3">-= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_pre</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_pre</span>
+            hand.bb.put_in_pot_pre <span class="s3">= </span><span class="s1">raisesize</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">raises to $</span><span class="s7">{</span><span class="s1">raisesize</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s0">except </span><span class="s1">ValueError</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">'Please enter a valid bet size.'</span><span class="s2">)</span>
+        <span class="s1">bb_preflop_raise</span><span class="s2">()</span>
+
+
+<span class="s0">def </span><span class="s1">dealer_preflop_call</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">hand.dealer.stack </span><span class="s3">-= </span><span class="s1">hand.bb.put_in_pot_pre </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_pre</span>
+    hand.pot <span class="s3">+= </span><span class="s1">hand.bb.put_in_pot_pre </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_pre</span>
+    hand.dealer.put_in_pot_pre <span class="s3">+= </span><span class="s1">hand.bb.put_in_pot_pre </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_pre</span>
+    
+    <span class="s0">if </span><span class="s1">hand.bb.all_in</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.dealer.stack </span><span class="s3">&gt; </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where dealer has bb covered </span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.bb.put_in_pot_pre</span><span class="s7">} </span><span class="s4">all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">sleep</span><span class="s2">(</span><span class="s6">2</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">sleep</span><span class="s2">(</span><span class="s6">2</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">hand.dealer.stack </span><span class="s3">&gt;= </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where bb has dealer covered (limits the pot from becoming impossibly big)</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.put_in_pot_pre <span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            remainder <span class="s3">= </span><span class="s1">hand.bb.put_in_pot_pre </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_pre</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.bb.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.dealer.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">hand.dealer.all_in </span><span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">hand.bb.all_in </span><span class="s3">= </span><span class="s0">False  </span><span class="s8"># if player goes all in and is called by a smaller stack they are no longer all in</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">is all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.dealer.stack </span><span class="s3">&lt;= </span><span class="s6">0</span><span class="s3">:</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.put_in_pot_pre <span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">hand.dealer.all_in </span><span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.bb.put_in_pot_pre </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_pre</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.bb.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">calls all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.bb.put_in_pot_pre</span><span class="s7">} </span><span class="s4">bet.'</span><span class="s2">)</span>
+
+
+<span class="s0">def </span><span class="s1">bb_preflop_call</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">hand.bb.stack </span><span class="s3">-= </span><span class="s1">hand.dealer.put_in_pot_pre </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_pre</span>
+    hand.pot <span class="s3">+= </span><span class="s1">hand.dealer.put_in_pot_pre </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_pre</span>
+    hand.bb.put_in_pot_pre <span class="s3">+= </span><span class="s1">hand.dealer.put_in_pot_pre </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_pre</span>
+    
+    <span class="s0">if </span><span class="s1">hand.dealer.all_in</span><span class="s3">:  </span><span class="s8"># case when the other player bets all in</span>
+        <span class="s0">if </span><span class="s1">hand.bb.stack </span><span class="s3">&gt; </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># bb has dealer covered</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.dealer.put_in_pot_pre</span><span class="s7">} </span><span class="s4">all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">hand.bb.stack </span><span class="s3">&gt;= </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where dealer has bb covered (limits the pot from becoming impossibly big)</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.put_in_pot_pre <span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.dealer.put_in_pot_pre </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_pre</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.dealer.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.bb.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">hand.dealer.all_in </span><span class="s3">= </span><span class="s0">False  </span><span class="s8"># if player goes all in and is called by a smaller stack they are no longer all in</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">is all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.bb.stack </span><span class="s3">&lt;= </span><span class="s6">0</span><span class="s3">:</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.put_in_pot_pre <span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">hand.bb.all_in </span><span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.dealer.put_in_pot_pre </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_pre</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.dealer.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">calls all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.dealer.put_in_pot_pre</span><span class="s7">} </span><span class="s4">bet.'</span><span class="s2">)</span>
+
+
+<span class="s0">def </span><span class="s1">pre_flop_decision_tree</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">bb_action </span><span class="s3">= </span><span class="s4">'r'</span>
+    <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+    <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+        <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+        <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+    <span class="s0">while </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r' </span><span class="s0">and </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+        <span class="s1">dealer_preflop_raise</span><span class="s2">()</span>
+        <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+        <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+            <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+            <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+        <span class="s0">if </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+            <span class="s1">bb_preflop_raise</span><span class="s2">()</span>
+            <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+            <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'c' </span><span class="s0">and </span><span class="s1">hand.pot </span><span class="s3">== </span><span class="s6">1.50</span><span class="s3">:  </span><span class="s8"># case where dealer 'limps' into pot</span>
+            <span class="s1">dealer_preflop_call</span><span class="s2">()</span>
+            <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+            <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;x&quot; or &quot;r&quot;.'</span><span class="s2">)</span>
+                <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+            <span class="s0">if </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'x'</span><span class="s3">:</span>
+                <span class="s0">pass  </span><span class="s8"># if bb checks nothing happens and hand continues to the flop</span>
+            <span class="s0">elif </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:  </span>
+                <span class="s1">dealer_action </span><span class="s3">= </span><span class="s4">'r'</span>
+                <span class="s0">while </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r' </span><span class="s0">and </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+                    <span class="s1">bb_preflop_raise</span><span class="s2">()</span>
+                    <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                    <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                        <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                        <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                        <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+                    <span class="s0">if </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+                        <span class="s1">dealer_preflop_raise</span><span class="s2">()</span>
+                        <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                        <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                            <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                            <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+                <span class="s0">else</span><span class="s3">:</span>
+                    <span class="s0">if </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+                        <span class="s1">dealer_preflop_call</span><span class="s2">()</span>
+                    <span class="s0">elif </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+                        <span class="s1">bb_preflop_call</span><span class="s2">()</span>
+                    <span class="s0">elif </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+                        <span class="s1">hand.bb.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+                        hand.player_folded <span class="s3">= </span><span class="s0">True</span>
+                    elif <span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+                        <span class="s1">hand.dealer.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+                        hand.player_folded <span class="s3">= </span><span class="s0">True</span>
+        elif <span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'c' </span><span class="s0">and </span><span class="s1">hand.pot </span><span class="s3">&gt; </span><span class="s6">1.50</span><span class="s3">:</span>
+            <span class="s1">dealer_preflop_call</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+            <span class="s1">bb_preflop_call</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+            <span class="s1">hand.bb.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+            hand.player_folded <span class="s3">= </span><span class="s0">True</span>
+        elif <span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+            <span class="s1">hand.dealer.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+            hand.player_folded <span class="s3">= </span><span class="s0">True</span>
+
+
+def <span class="s1">dealer_flop_raise</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">minimum_raise </span><span class="s3">= </span><span class="s2">(</span><span class="s6">2 </span><span class="s3">* </span><span class="s2">(</span><span class="s1">hand.bb.put_in_pot_flop </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_flop</span><span class="s2">))</span>
+
+    <span class="s0">try</span><span class="s3">:</span>
+        <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">float</span><span class="s2">(</span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'How much would you like to raise to? (Stack = </span><span class="s7">{</span><span class="s1">hand.dealer.stack</span><span class="s7">}</span><span class="s4">): $'</span><span class="s2">))</span>
+        <span class="s0">if </span><span class="s1">raisesize </span><span class="s3">&gt;= </span><span class="s1">hand.dealer.stack </span><span class="s3">+ </span><span class="s1">hand.dealer.put_in_pot_flop</span><span class="s3">:</span>
+            <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">hand.dealer.stack </span><span class="s3">+ </span><span class="s1">hand.dealer.put_in_pot_flop</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize</span>
+            hand.dealer.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">is all in!'</span><span class="s2">)</span>
+            <span class="s1">hand.dealer.stack </span><span class="s3">= </span><span class="s6">0.00</span>
+        <span class="s0">elif </span><span class="s1">raisesize </span><span class="s3">&lt; </span><span class="s1">minimum_raise</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'You must raise to at least $</span><span class="s7">{</span><span class="s1">minimum_raise</span><span class="s7">}</span><span class="s4">!'</span><span class="s2">)</span>
+            <span class="s1">dealer_flop_raise</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">hand.dealer.stack </span><span class="s3">-= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_flop</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_flop</span>
+            hand.dealer.put_in_pot_flop <span class="s3">= </span><span class="s1">raisesize</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">raises to $</span><span class="s7">{</span><span class="s1">raisesize</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s0">except </span><span class="s1">ValueError</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">'Please enter a valid bet size.'</span><span class="s2">)</span>
+        <span class="s1">dealer_flop_raise</span><span class="s2">()</span>
+
+
+<span class="s0">def </span><span class="s1">bb_flop_raise</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">minimum_raise </span><span class="s3">= </span><span class="s2">(</span><span class="s6">2 </span><span class="s3">* </span><span class="s2">(</span><span class="s1">hand.dealer.put_in_pot_flop </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_flop</span><span class="s2">)) </span><span class="s3">+ </span><span class="s1">hand.dealer.put_in_pot_flop</span>
+
+    <span class="s0">try</span><span class="s3">:</span>
+        <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">float</span><span class="s2">(</span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'How much would you like to raise to? (Stack = </span><span class="s7">{</span><span class="s1">hand.bb.stack</span><span class="s7">}</span><span class="s4">): $'</span><span class="s2">))</span>
+        <span class="s0">if </span><span class="s1">raisesize </span><span class="s3">&gt;= </span><span class="s1">hand.bb.stack </span><span class="s3">+ </span><span class="s1">hand.bb.put_in_pot_flop</span><span class="s3">:</span>
+            <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">hand.bb.stack </span><span class="s3">+ </span><span class="s1">hand.bb.put_in_pot_flop</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize</span>
+            hand.bb.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">is all in!'</span><span class="s2">)</span>
+            <span class="s1">hand.bb.stack </span><span class="s3">= </span><span class="s6">0.00</span>
+        <span class="s0">elif </span><span class="s1">raisesize </span><span class="s3">&lt; </span><span class="s1">minimum_raise</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'You must raise to at least $</span><span class="s7">{</span><span class="s1">minimum_raise</span><span class="s7">}</span><span class="s4">!'</span><span class="s2">)</span>
+            <span class="s1">bb_flop_raise</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">hand.bb.stack </span><span class="s3">-= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_flop</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_flop</span>
+            hand.bb.put_in_pot_flop <span class="s3">= </span><span class="s1">raisesize</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">raises to $</span><span class="s7">{</span><span class="s1">raisesize</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s0">except </span><span class="s1">ValueError</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">'Please enter a valid bet size.'</span><span class="s2">)</span>
+        <span class="s1">bb_flop_raise</span><span class="s2">()</span>
+
+
+<span class="s0">def </span><span class="s1">dealer_flop_call</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">hand.dealer.stack </span><span class="s3">-= </span><span class="s1">hand.bb.put_in_pot_flop </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_flop</span>
+    hand.pot <span class="s3">+= </span><span class="s1">hand.bb.put_in_pot_flop </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_flop</span>
+    hand.dealer.put_in_pot_flop <span class="s3">+= </span><span class="s1">hand.bb.put_in_pot_flop </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_flop</span>
+    
+    <span class="s0">if </span><span class="s1">hand.bb.all_in</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.dealer.stack </span><span class="s3">&gt; </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where dealer has bb covered </span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.bb.put_in_pot_flop</span><span class="s7">} </span><span class="s4">all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">hand.dealer.stack </span><span class="s3">&gt;= </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where bb has dealer covered (limits the pot from becoming impossibly big)</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.put_in_pot_flop <span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.bb.put_in_pot_flop </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_flop</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.bb.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.dealer.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">hand.bb.all_in </span><span class="s3">= </span><span class="s0">False  </span><span class="s8"># if player goes all in and is called by a smaller stack they are no longer all in</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">is all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.dealer.stack </span><span class="s3">&lt;= </span><span class="s6">0</span><span class="s3">:</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.put_in_pot_flop <span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.bb.put_in_pot_flop </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_flop</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.bb.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.dealer.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">calls all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.bb.put_in_pot_flop</span><span class="s7">} </span><span class="s4">bet.'</span><span class="s2">)</span>
+
+
+<span class="s0">def </span><span class="s1">bb_flop_call</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">hand.bb.stack </span><span class="s3">-= </span><span class="s1">hand.dealer.put_in_pot_flop </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_flop</span>
+    hand.pot <span class="s3">+= </span><span class="s1">hand.dealer.put_in_pot_flop </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_flop</span>
+    hand.bb.put_in_pot_flop <span class="s3">+= </span><span class="s1">hand.dealer.put_in_pot_flop </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_flop</span>
+    
+    <span class="s0">if </span><span class="s1">hand.dealer.all_in</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.bb.stack </span><span class="s3">&gt; </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where bb has dealer covered </span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.dealer.put_in_pot_flop</span><span class="s7">} </span><span class="s4">all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">hand.bb.stack </span><span class="s3">&gt;= </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where dealer has bb covered (limits the pot from becoming impossibly big)</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.put_in_pot_flop <span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.dealer.put_in_pot_flop </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_flop</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.dealer.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.bb.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">hand.dealer.all_in </span><span class="s3">= </span><span class="s0">False  </span><span class="s8"># if player goes all in and is called by a smaller stack they are no longer all in</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">is all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.bb.stack </span><span class="s3">&lt;= </span><span class="s6">0</span><span class="s3">:</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.put_in_pot_flop <span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.dealer.put_in_pot_flop </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_flop</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.dealer.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.bb.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">calls all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.dealer.put_in_pot_flop</span><span class="s7">} </span><span class="s4">bet.'</span><span class="s2">)</span>
+
+
+<span class="s0">def </span><span class="s1">flop_decision_tree</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The flop is: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is: $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+    <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;x&quot; or &quot;r&quot;.'</span><span class="s2">)</span>
+        <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+        <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+    <span class="s1">dealer_action </span><span class="s3">= </span><span class="s4">'r'</span>
+    <span class="s0">while </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r' </span><span class="s0">and </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+        <span class="s1">bb_flop_raise</span><span class="s2">()</span>
+        <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+        <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+            <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+            <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+        <span class="s0">if </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+            <span class="s1">dealer_flop_raise</span><span class="s2">()</span>
+            <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+            <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'x'</span><span class="s3">:</span>
+            <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+            <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;x&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+            <span class="s0">if </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'x'</span><span class="s3">:</span>
+                <span class="s0">pass</span>
+            elif <span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+                <span class="s1">bb_action </span><span class="s3">= </span><span class="s4">'r'</span>
+                <span class="s0">while </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r' </span><span class="s0">and </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+                    <span class="s1">dealer_flop_raise</span><span class="s2">()</span>
+                    <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                    <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                        <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                        <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                        <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+                    <span class="s0">if </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+                        <span class="s1">bb_flop_raise</span><span class="s2">()</span>
+                        <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                        <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                            <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                            <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+                <span class="s0">else</span><span class="s3">:</span>
+                    <span class="s0">if </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+                        <span class="s1">dealer_flop_call</span><span class="s2">()</span>
+                    <span class="s0">elif </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+                        <span class="s1">bb_flop_call</span><span class="s2">()</span>
+                    <span class="s0">elif </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+                        <span class="s1">hand.bb.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+                        hand.player_folded <span class="s3">= </span><span class="s0">True</span>
+                        <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">wins the hand.'</span><span class="s2">)</span>
+                    <span class="s0">elif </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+                        <span class="s1">hand.dealer.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+                        print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">wins the hand.'</span><span class="s2">)</span>
+                        <span class="s1">hand.player_folded </span><span class="s3">= </span><span class="s0">True</span>
+        elif <span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+            <span class="s1">dealer_flop_call</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+            <span class="s1">bb_flop_call</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+            <span class="s1">hand.bb.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+            hand.player_folded <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">wins the hand.'</span><span class="s2">)</span>
+            <span class="s1">hand.player_folded </span><span class="s3">= </span><span class="s0">True</span>
+        elif <span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+            <span class="s1">hand.dealer.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+            hand.player_folded <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">wins the hand.'</span><span class="s2">)</span>
+            <span class="s1">hand.player_folded </span><span class="s3">= </span><span class="s0">True</span>
+
+
+def <span class="s1">dealer_turn_raise</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">minimum_raise </span><span class="s3">= </span><span class="s2">(</span><span class="s6">2 </span><span class="s3">* </span><span class="s2">(</span><span class="s1">hand.bb.put_in_pot_turn </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_turn</span><span class="s2">))</span>
+
+    <span class="s0">try</span><span class="s3">:</span>
+        <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">float</span><span class="s2">(</span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'How much would you like to raise to? (Stack = </span><span class="s7">{</span><span class="s1">hand.dealer.stack</span><span class="s7">}</span><span class="s4">): $'</span><span class="s2">))</span>
+        <span class="s0">if </span><span class="s1">raisesize </span><span class="s3">&gt;= </span><span class="s1">hand.dealer.stack </span><span class="s3">+ </span><span class="s1">hand.dealer.put_in_pot_turn</span><span class="s3">:</span>
+            <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">hand.dealer.stack </span><span class="s3">+ </span><span class="s1">hand.dealer.put_in_pot_turn</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize</span>
+            hand.dealer.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">is all in!'</span><span class="s2">)</span>
+            <span class="s1">hand.dealer.stack </span><span class="s3">= </span><span class="s6">0.00</span>
+        <span class="s0">elif </span><span class="s1">raisesize </span><span class="s3">&lt; </span><span class="s1">minimum_raise</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'You must raise to at least $</span><span class="s7">{</span><span class="s1">minimum_raise</span><span class="s7">}</span><span class="s4">!'</span><span class="s2">)</span>
+            <span class="s1">dealer_turn_raise</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">hand.dealer.stack </span><span class="s3">-= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_turn</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_turn</span>
+            hand.dealer.put_in_pot_turn <span class="s3">= </span><span class="s1">raisesize</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">raises to $</span><span class="s7">{</span><span class="s1">raisesize</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s0">except </span><span class="s1">ValueError</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">'Please enter a valid bet size.'</span><span class="s2">)</span>
+        <span class="s1">dealer_turn_raise</span><span class="s2">()</span>
+
+
+<span class="s0">def </span><span class="s1">bb_turn_raise</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">minimum_raise </span><span class="s3">= </span><span class="s2">(</span><span class="s6">2 </span><span class="s3">* </span><span class="s2">(</span><span class="s1">hand.dealer.put_in_pot_turn </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_turn</span><span class="s2">)) </span><span class="s3">+ </span><span class="s1">hand.dealer.put_in_pot_turn</span>
+
+    <span class="s0">try</span><span class="s3">:</span>
+        <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">float</span><span class="s2">(</span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'How much would you like to raise to? (Stack = </span><span class="s7">{</span><span class="s1">hand.bb.stack</span><span class="s7">}</span><span class="s4">): $'</span><span class="s2">))</span>
+        <span class="s0">if </span><span class="s1">raisesize </span><span class="s3">&gt;= </span><span class="s1">hand.bb.stack </span><span class="s3">+ </span><span class="s1">hand.bb.put_in_pot_turn</span><span class="s3">:</span>
+            <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">hand.bb.stack </span><span class="s3">+ </span><span class="s1">hand.bb.put_in_pot_turn</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize</span>
+            hand.bb.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">is all in!'</span><span class="s2">)</span>
+            <span class="s1">hand.bb.stack </span><span class="s3">= </span><span class="s6">0.00</span>
+        <span class="s0">elif </span><span class="s1">raisesize </span><span class="s3">&lt; </span><span class="s1">minimum_raise</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'You must raise to at least $</span><span class="s7">{</span><span class="s1">minimum_raise</span><span class="s7">}</span><span class="s4">!'</span><span class="s2">)</span>
+            <span class="s1">bb_turn_raise</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">hand.bb.stack </span><span class="s3">-= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_turn</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_turn</span>
+            hand.bb.put_in_pot_turn <span class="s3">= </span><span class="s1">raisesize</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">raises to $</span><span class="s7">{</span><span class="s1">raisesize</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s0">except </span><span class="s1">ValueError</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">'Please enter a valid bet size.'</span><span class="s2">)</span>
+        <span class="s1">bb_turn_raise</span><span class="s2">()</span>
+
+
+<span class="s0">def </span><span class="s1">dealer_turn_call</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">hand.dealer.stack </span><span class="s3">-= </span><span class="s1">hand.bb.put_in_pot_turn </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_turn</span>
+    hand.pot <span class="s3">+= </span><span class="s1">hand.bb.put_in_pot_turn </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_turn</span>
+    hand.dealer.put_in_pot_turn <span class="s3">+= </span><span class="s1">hand.bb.put_in_pot_turn </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_turn</span>
+    
+    <span class="s0">if </span><span class="s1">hand.bb.all_in</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.dealer.stack </span><span class="s3">&gt; </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where dealer has bb covered </span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.bb.put_in_pot_turn</span><span class="s7">} </span><span class="s4">all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">hand.dealer.stack </span><span class="s3">&gt;= </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where bb has dealer covered (limits the pot from becoming impossibly big)</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.put_in_pot_turn <span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.bb.put_in_pot_turn </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_turn</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.bb.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.dealer.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">hand.bb.all_in </span><span class="s3">= </span><span class="s0">False  </span><span class="s8"># if player goes all in and is called by a smaller stack they are no longer all in</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">is all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.dealer.stack </span><span class="s3">&lt;= </span><span class="s6">0</span><span class="s3">:</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.put_in_pot_turn <span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.bb.put_in_pot_turn </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_turn</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.bb.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.dealer.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">calls all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.bb.put_in_pot_turn</span><span class="s7">} </span><span class="s4">bet.'</span><span class="s2">)</span>
+
+
+<span class="s0">def </span><span class="s1">bb_turn_call</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">hand.bb.stack </span><span class="s3">-= </span><span class="s1">hand.dealer.put_in_pot_turn </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_turn</span>
+    hand.pot <span class="s3">+= </span><span class="s1">hand.dealer.put_in_pot_turn </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_turn</span>
+    hand.bb.put_in_pot_turn <span class="s3">+= </span><span class="s1">hand.dealer.put_in_pot_turn </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_turn</span>
+    
+    <span class="s0">if </span><span class="s1">hand.dealer.all_in</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.bb.stack </span><span class="s3">&gt; </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where bb has dealer covered </span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.dealer.put_in_pot_turn</span><span class="s7">} </span><span class="s4">all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">hand.bb.stack </span><span class="s3">&gt;= </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where dealer has bb covered (limits the pot from becoming impossibly big)</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.put_in_pot_turn <span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.dealer.put_in_pot_turn </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_turn</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.dealer.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.bb.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">hand.dealer.all_in </span><span class="s3">= </span><span class="s0">False  </span><span class="s8"># if player goes all in and is called by a smaller stack they are no longer all in</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">is all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.bb.stack </span><span class="s3">&lt;= </span><span class="s6">0</span><span class="s3">:</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.put_in_pot_turn <span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.dealer.put_in_pot_turn </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_turn</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.dealer.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.bb.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">calls all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.dealer.put_in_pot_turn</span><span class="s7">} </span><span class="s4">bet.'</span><span class="s2">)</span>
+
+
+<span class="s0">def </span><span class="s1">turn_decision_tree</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The turn is: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The board is: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is: $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+    <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;x&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+        <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+        <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+    <span class="s1">dealer_action </span><span class="s3">= </span><span class="s4">'r'</span>
+    <span class="s0">while </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r' </span><span class="s0">and </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+        <span class="s1">bb_turn_raise</span><span class="s2">()</span>
+        <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+        <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+            <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+            <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+        <span class="s0">if </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+            <span class="s1">dealer_turn_raise</span><span class="s2">()</span>
+            <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+            <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'x'</span><span class="s3">:</span>
+            <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+            <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;x&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+            <span class="s0">if </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'x'</span><span class="s3">:</span>
+                <span class="s0">pass</span>
+            elif <span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+                <span class="s1">bb_action </span><span class="s3">= </span><span class="s4">'r'</span>
+                <span class="s0">while </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r' </span><span class="s0">and </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+                    <span class="s1">dealer_turn_raise</span><span class="s2">()</span>
+                    <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                    <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                        <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                        <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                        <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+                    <span class="s0">if </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+                        <span class="s1">bb_turn_raise</span><span class="s2">()</span>
+                        <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                        <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                            <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                            <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+                <span class="s0">else</span><span class="s3">:</span>
+                    <span class="s0">if </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+                        <span class="s1">dealer_turn_call</span><span class="s2">()</span>
+                    <span class="s0">elif </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+                        <span class="s1">bb_turn_call</span><span class="s2">()</span>
+                    <span class="s0">elif </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+                        <span class="s1">hand.bb.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+                        print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">wins the hand.'</span><span class="s2">)</span>
+                        <span class="s1">hand.player_folded </span><span class="s3">= </span><span class="s0">True</span>
+                    elif <span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+                        <span class="s1">hand.dealer.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+                        print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">wins the hand.'</span><span class="s2">)</span>
+                        <span class="s1">hand.player_folded </span><span class="s3">= </span><span class="s0">True</span>
+        elif <span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+            <span class="s1">dealer_turn_call</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+            <span class="s1">bb_turn_call</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+            <span class="s1">hand.bb.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">wins the hand.'</span><span class="s2">)</span>
+            <span class="s1">hand.player_folded </span><span class="s3">= </span><span class="s0">True</span>
+        elif <span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+            <span class="s1">hand.dealer.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">wins the hand.'</span><span class="s2">)</span>
+            <span class="s1">hand.player_folded </span><span class="s3">= </span><span class="s0">True</span>
+
+
+def <span class="s1">dealer_river_raise</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">minimum_raise </span><span class="s3">= </span><span class="s2">(</span><span class="s6">2 </span><span class="s3">* </span><span class="s2">(</span><span class="s1">hand.bb.put_in_pot_river </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_river</span><span class="s2">))</span>
+
+    <span class="s0">try</span><span class="s3">:</span>
+        <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">float</span><span class="s2">(</span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'How much would you like to raise to? (Stack = </span><span class="s7">{</span><span class="s1">hand.dealer.stack</span><span class="s7">}</span><span class="s4">): $'</span><span class="s2">))</span>
+        <span class="s0">if </span><span class="s1">raisesize </span><span class="s3">&gt;= </span><span class="s1">hand.dealer.stack </span><span class="s3">+ </span><span class="s1">hand.dealer.put_in_pot_river</span><span class="s3">:</span>
+            <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">hand.dealer.stack </span><span class="s3">+ </span><span class="s1">hand.dealer.put_in_pot_river</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize</span>
+            hand.dealer.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">is all in!'</span><span class="s2">)</span>
+            <span class="s1">hand.dealer.stack </span><span class="s3">= </span><span class="s6">0.00</span>
+        <span class="s0">elif </span><span class="s1">raisesize </span><span class="s3">&lt; </span><span class="s1">minimum_raise</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'You must raise to at least $</span><span class="s7">{</span><span class="s1">minimum_raise</span><span class="s7">}</span><span class="s4">!'</span><span class="s2">)</span>
+            <span class="s1">dealer_river_raise</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">hand.dealer.stack </span><span class="s3">-= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_river</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_river</span>
+            hand.dealer.put_in_pot_river <span class="s3">= </span><span class="s1">raisesize</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">raises to $</span><span class="s7">{</span><span class="s1">raisesize</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s0">except </span><span class="s1">ValueError</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">'Please enter a valid bet size.'</span><span class="s2">)</span>
+        <span class="s1">dealer_river_raise</span><span class="s2">()</span>
+
+
+<span class="s0">def </span><span class="s1">bb_river_raise</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">minimum_raise </span><span class="s3">= </span><span class="s2">(</span><span class="s6">2 </span><span class="s3">* </span><span class="s2">(</span><span class="s1">hand.dealer.put_in_pot_river </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_river</span><span class="s2">)) </span><span class="s3">+ </span><span class="s1">hand.dealer.put_in_pot_river</span>
+
+    <span class="s0">try</span><span class="s3">:</span>
+        <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">float</span><span class="s2">(</span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'How much would you like to raise to? (Stack = </span><span class="s7">{</span><span class="s1">hand.bb.stack</span><span class="s7">}</span><span class="s4">): $'</span><span class="s2">))</span>
+        <span class="s0">if </span><span class="s1">raisesize </span><span class="s3">&gt;= </span><span class="s1">hand.bb.stack </span><span class="s3">+ </span><span class="s1">hand.bb.put_in_pot_river</span><span class="s3">:</span>
+            <span class="s1">raisesize </span><span class="s3">= </span><span class="s1">hand.bb.stack </span><span class="s3">+ </span><span class="s1">hand.bb.put_in_pot_river</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize</span>
+            hand.bb.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">is all in!'</span><span class="s2">)</span>
+            <span class="s1">hand.bb.stack </span><span class="s3">= </span><span class="s6">0.00</span>
+        <span class="s0">elif </span><span class="s1">raisesize </span><span class="s3">&lt; </span><span class="s1">minimum_raise</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'You must raise to at least $</span><span class="s7">{</span><span class="s1">minimum_raise</span><span class="s7">}</span><span class="s4">!'</span><span class="s2">)</span>
+            <span class="s1">bb_river_raise</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">hand.bb.stack </span><span class="s3">-= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_river</span>
+            hand.pot <span class="s3">+= </span><span class="s1">raisesize </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_river</span>
+            hand.bb.put_in_pot_river <span class="s3">= </span><span class="s1">raisesize</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">raises to $</span><span class="s7">{</span><span class="s1">raisesize</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s0">except </span><span class="s1">ValueError</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">'Please enter a valid bet size.'</span><span class="s2">)</span>
+        <span class="s1">bb_river_raise</span><span class="s2">()</span>
+
+
+<span class="s0">def </span><span class="s1">dealer_river_call</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">hand.dealer.stack </span><span class="s3">-= </span><span class="s1">hand.bb.put_in_pot_river </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_river</span>
+    hand.pot <span class="s3">+= </span><span class="s1">hand.bb.put_in_pot_river </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_river</span>
+    hand.dealer.put_in_pot_river <span class="s3">+= </span><span class="s1">hand.bb.put_in_pot_river </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_river</span>
+    
+    <span class="s0">if </span><span class="s1">hand.bb.all_in</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.dealer.stack </span><span class="s3">&gt; </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where dealer has bb covered </span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.bb.put_in_pot_river</span><span class="s7">} </span><span class="s4">all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">hand.dealer.stack </span><span class="s3">&gt;= </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where bb has dealer covered (limits the pot from becoming impossibly big)</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.put_in_pot_river <span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.bb.put_in_pot_river </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_river</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.bb.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.dealer.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">hand.bb.all_in </span><span class="s3">= </span><span class="s0">False  </span><span class="s8"># if player goes all in and is called by a smaller stack they are no longer all in</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">is all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.dealer.stack </span><span class="s3">&lt;= </span><span class="s6">0</span><span class="s3">:</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.put_in_pot_river <span class="s3">+= </span><span class="s1">hand.dealer.stack</span>
+            hand.dealer.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.bb.put_in_pot_river </span><span class="s3">- </span><span class="s1">hand.dealer.put_in_pot_river</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.bb.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.dealer.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">calls all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.bb.put_in_pot_river</span><span class="s7">} </span><span class="s4">bet.'</span><span class="s2">)</span>
+
+
+<span class="s0">def </span><span class="s1">bb_river_call</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">hand.bb.stack </span><span class="s3">-= </span><span class="s1">hand.dealer.put_in_pot_river </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_river</span>
+    hand.pot <span class="s3">+= </span><span class="s1">hand.dealer.put_in_pot_river </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_river</span>
+    hand.bb.put_in_pot_river <span class="s3">+= </span><span class="s1">hand.dealer.put_in_pot_river </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_river</span>
+    
+    <span class="s0">if </span><span class="s1">hand.dealer.all_in</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.bb.stack </span><span class="s3">&gt; </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where bb has dealer covered </span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.dealer.put_in_pot_river</span><span class="s7">} </span><span class="s4">all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">hand.bb.stack </span><span class="s3">&gt;= </span><span class="s6">0</span><span class="s3">:  </span><span class="s8"># case where dealer has bb covered (limits the pot from becoming impossibly big)</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.put_in_pot_river <span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.dealer.put_in_pot_river </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_river</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.dealer.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.bb.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">hand.dealer.all_in </span><span class="s3">= </span><span class="s0">False  </span><span class="s8"># if player goes all in and is called by a smaller stack they are no longer all in</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">is all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">hand.bb.stack </span><span class="s3">&lt;= </span><span class="s6">0</span><span class="s3">:</span>
+            <span class="s1">hand.pot </span><span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.put_in_pot_river <span class="s3">+= </span><span class="s1">hand.bb.stack</span>
+            hand.bb.stack <span class="s3">= </span><span class="s6">0</span>
+            <span class="s1">remainder </span><span class="s3">= </span><span class="s1">hand.dealer.put_in_pot_river </span><span class="s3">- </span><span class="s1">hand.bb.put_in_pot_river</span>
+            hand.pot <span class="s3">-= </span><span class="s1">remainder</span>
+            hand.dealer.stack <span class="s3">+= </span><span class="s1">remainder</span>
+            hand.bb.all_in <span class="s3">= </span><span class="s0">True</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">calls all in.'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'''The board runs out: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} </span>
+            {<span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'''</span><span class="s2">)</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">else</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">calls the $</span><span class="s7">{</span><span class="s1">hand.dealer.put_in_pot_river</span><span class="s7">} </span><span class="s4">bet.'</span><span class="s2">)</span>
+
+
+<span class="s0">def </span><span class="s1">river_decision_tree</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The river is: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The board is: </span><span class="s7">{</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">2</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">3</span><span class="s3">]</span><span class="s7">} {</span><span class="s1">hand.community_cards</span><span class="s3">[</span><span class="s6">4</span><span class="s3">]</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot is: $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+    <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;x&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+        <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+        <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+    <span class="s1">dealer_action </span><span class="s3">= </span><span class="s4">'r'</span>
+    <span class="s0">while </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r' </span><span class="s0">and </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+        <span class="s1">bb_river_raise</span><span class="s2">()</span>
+        <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+        <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+            <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+            <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+        <span class="s0">if </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+            <span class="s1">dealer_river_raise</span><span class="s2">()</span>
+            <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+            <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s0">if </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'x'</span><span class="s3">:</span>
+            <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+            <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;x&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to check(x), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'x'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+            <span class="s0">if </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'x'</span><span class="s3">:</span>
+                <span class="s1">hand.get_winner</span><span class="s2">()</span>
+                <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+            <span class="s0">elif </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+                <span class="s1">bb_action </span><span class="s3">= </span><span class="s4">'r'</span>
+                <span class="s0">while </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'r' </span><span class="s0">and </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+                    <span class="s1">dealer_river_raise</span><span class="s2">()</span>
+                    <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                    <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                        <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                        <span class="s1">bb_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                        <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">bb_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+                    <span class="s0">if </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'r'</span><span class="s3">:</span>
+                        <span class="s1">bb_river_raise</span><span class="s2">()</span>
+                        <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                        <span class="s0">while not </span><span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span><span class="s3">:</span>
+                            <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Invalid input please enter: &quot;c&quot;, &quot;f&quot;, or &quot;r&quot;.'</span><span class="s2">)</span>
+                            <span class="s1">dealer_action </span><span class="s3">= </span><span class="s1">input</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, would you like to call(c), fold(f), or raise(r)?: '</span><span class="s2">)</span><span class="s1">.lower</span><span class="s2">()</span>
+                            <span class="s1">valid_input</span><span class="s2">(</span><span class="s1">dealer_action</span><span class="s5">, </span><span class="s3">[</span><span class="s4">'c'</span><span class="s5">, </span><span class="s4">'f'</span><span class="s5">, </span><span class="s4">'r'</span><span class="s3">]</span><span class="s2">)</span>
+                <span class="s0">else</span><span class="s3">:</span>
+                    <span class="s0">if </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+                        <span class="s1">dealer_river_call</span><span class="s2">()</span>
+                        <span class="s1">hand.get_winner</span><span class="s2">()</span>
+                        <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+                    <span class="s0">elif </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+                        <span class="s1">bb_river_call</span><span class="s2">()</span>
+                        <span class="s1">hand.get_winner</span><span class="s2">()</span>
+                        <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+                    <span class="s0">elif </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+                        <span class="s1">hand.bb.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+                        print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">wins the hand.'</span><span class="s2">)</span>
+                        <span class="s1">hand.player_folded </span><span class="s3">= </span><span class="s0">True</span>
+                    elif <span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+                        <span class="s1">hand.dealer.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+                        print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">wins the hand.'</span><span class="s2">)</span>
+                        <span class="s1">hand.player_folded </span><span class="s3">= </span><span class="s0">True</span>
+        elif <span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+            <span class="s1">dealer_river_call</span><span class="s2">()</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'c'</span><span class="s3">:</span>
+            <span class="s1">bb_river_call</span><span class="s2">()</span>
+            <span class="s1">hand.get_winner</span><span class="s2">()</span>
+            <span class="s1">hand.allocate_pot</span><span class="s2">()</span>
+        <span class="s0">elif </span><span class="s1">dealer_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+            <span class="s1">hand.bb.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">wins the hand.'</span><span class="s2">)</span>
+            <span class="s1">hand.player_folded </span><span class="s3">= </span><span class="s0">True</span>
+        elif <span class="s1">bb_action </span><span class="s3">== </span><span class="s4">'f'</span><span class="s3">:</span>
+            <span class="s1">hand.dealer.stack </span><span class="s3">+= </span><span class="s1">hand.pot</span>
+            print<span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">wins the hand.'</span><span class="s2">)</span>
+            <span class="s1">hand.player_folded </span><span class="s3">= </span><span class="s0">True</span>
+
+
+def <span class="s1">reset_hand</span><span class="s2">()</span><span class="s3">:</span>
+    <span class="s1">hand.pot </span><span class="s3">= </span><span class="s6">0</span>
+    <span class="s1">hand.dealer.put_in_pot_pre </span><span class="s3">= </span><span class="s6">0</span>
+    <span class="s1">hand.dealer.put_in_pot_flop </span><span class="s3">= </span><span class="s6">0</span>
+    <span class="s1">hand.dealer.put_in_pot_turn </span><span class="s3">= </span><span class="s6">0</span>
+    <span class="s1">hand.dealer.put_in_pot_river </span><span class="s3">= </span><span class="s6">0</span>
+    <span class="s1">hand.dealer.all_in </span><span class="s3">= </span><span class="s0">False</span>
+    <span class="s1">hand.bb.put_in_pot_pre </span><span class="s3">= </span><span class="s6">0</span>
+    <span class="s1">hand.bb.put_in_pot_flop </span><span class="s3">= </span><span class="s6">0</span>
+    <span class="s1">hand.bb.put_in_pot_turn </span><span class="s3">= </span><span class="s6">0</span>
+    <span class="s1">hand.bb.put_in_pot_river </span><span class="s3">= </span><span class="s6">0</span>
+    <span class="s1">hand.bb.all_in </span><span class="s3">= </span><span class="s0">False</span>
+
+
+<span class="s1">count </span><span class="s3">= </span><span class="s6">0</span>
+
+<span class="s0">while </span><span class="s1">player1.stack </span><span class="s3">&gt; </span><span class="s6">0.00 </span><span class="s0">and </span><span class="s1">player2.stack </span><span class="s3">&gt; </span><span class="s6">0.00</span><span class="s3">:</span>
+    <span class="s0">if </span><span class="s1">count </span><span class="s3">% </span><span class="s6">2 </span><span class="s3">== </span><span class="s6">0</span><span class="s3">:</span>
+        <span class="s1">hand </span><span class="s3">= </span><span class="s1">NewHand</span><span class="s2">(</span><span class="s1">player1</span><span class="s5">, </span><span class="s1">player2</span><span class="s2">)</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s1">hand </span><span class="s3">= </span><span class="s1">NewHand</span><span class="s2">(</span><span class="s1">player2</span><span class="s5">, </span><span class="s1">player1</span><span class="s2">)</span>
+
+    <span class="s1">reset_hand</span><span class="s2">()</span>
+    <span class="s1">hand.take_blinds</span><span class="s2">()</span>
+
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Look away </span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">}</span><span class="s4">!'</span><span class="s2">)</span>
+    <span class="s1">sleep</span><span class="s2">(</span><span class="s6">5</span><span class="s2">)</span>
+    <span class="s1">clear_screen</span><span class="s2">()</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">} </span><span class="s4">you hand is: </span><span class="s7">{</span><span class="s1">hand.dealer_hand</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">}{</span><span class="s1">hand.dealer_hand</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">}</span><span class="s4">, write this down!'</span><span class="s2">)</span>
+    <span class="s1">sleep</span><span class="s2">(</span><span class="s6">6</span><span class="s2">)</span>
+    <span class="s1">clear_screen</span><span class="s2">()</span>
+
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Look away now </span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">, and tell </span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">to look.'</span><span class="s2">)</span>
+    <span class="s1">sleep</span><span class="s2">(</span><span class="s6">5</span><span class="s2">)</span>
+    <span class="s1">clear_screen</span><span class="s2">()</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'</span><span class="s7">{</span><span class="s1">hand.bb.name</span><span class="s7">} </span><span class="s4">you hand is: </span><span class="s7">{</span><span class="s1">hand.bb_hand</span><span class="s3">[</span><span class="s6">0</span><span class="s3">]</span><span class="s7">}{</span><span class="s1">hand.bb_hand</span><span class="s3">[</span><span class="s6">1</span><span class="s3">]</span><span class="s7">}</span><span class="s4">, write this down!'</span><span class="s2">)</span>
+    <span class="s1">sleep</span><span class="s2">(</span><span class="s6">6</span><span class="s2">)</span>
+    <span class="s1">clear_screen</span><span class="s2">()</span>
+
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The dealer is: </span><span class="s7">{</span><span class="s1">hand.dealer.name</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Stacks are </span><span class="s7">{</span><span class="s1">player1.name</span><span class="s7">}</span><span class="s4">: </span><span class="s7">{</span><span class="s1">player1.stack</span><span class="s7">}</span><span class="s4">, </span><span class="s7">{</span><span class="s1">player2.name</span><span class="s7">}</span><span class="s4">: </span><span class="s7">{</span><span class="s1">player2.stack</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+    <span class="s1">print</span><span class="s2">(</span><span class="s4">f'The pot stands at: $</span><span class="s7">{</span><span class="s1">hand.pot</span><span class="s7">}</span><span class="s4">'</span><span class="s2">)</span>
+
+    <span class="s1">pre_flop_decision_tree</span><span class="s2">()</span>
+    <span class="s0">if not </span><span class="s1">hand.player_folded </span><span class="s0">and not </span><span class="s1">hand.dealer.all_in </span><span class="s0">and not </span><span class="s1">hand.bb.all_in</span><span class="s3">:</span>
+        <span class="s1">flop_decision_tree</span><span class="s2">()</span>
+        <span class="s0">if not </span><span class="s1">hand.player_folded </span><span class="s0">and not </span><span class="s1">hand.dealer.all_in </span><span class="s0">and not </span><span class="s1">hand.bb.all_in</span><span class="s3">:</span>
+            <span class="s1">turn_decision_tree</span><span class="s2">()</span>
+            <span class="s0">if not </span><span class="s1">hand.player_folded </span><span class="s0">and not </span><span class="s1">hand.dealer.all_in </span><span class="s0">and not </span><span class="s1">hand.bb.all_in</span><span class="s3">:</span>
+                <span class="s1">river_decision_tree</span><span class="s2">()</span>
+
+    <span class="s1">count </span><span class="s3">+= </span><span class="s6">1</span>
+    <span class="s1">sleep</span><span class="s2">(</span><span class="s6">2</span><span class="s2">)</span>
+    <span class="s1">clear_screen</span><span class="s2">()</span>
+
+<span class="s0">else</span><span class="s3">:</span>
+    <span class="s0">if </span><span class="s1">player1.stack </span><span class="s3">&gt; </span><span class="s1">player2.stack</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Game over. </span><span class="s7">{</span><span class="s1">player1.name</span><span class="s7">} </span><span class="s4">is the winner!'</span><span class="s2">)</span>
+    <span class="s0">else</span><span class="s3">:</span>
+        <span class="s1">print</span><span class="s2">(</span><span class="s4">f'Game over. </span><span class="s7">{</span><span class="s1">player2.name</span><span class="s7">} </span><span class="s4">is the winner!'</span><span class="s2">)</span>
+</pre>
+</body>
+</html>

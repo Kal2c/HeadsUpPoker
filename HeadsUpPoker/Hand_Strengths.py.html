@@ -1,0 +1,210 @@
+<html>
+<head>
+<title>Hand_Strengths.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc9900; font-weight: bold;}
+.s1 { color: #9bc28e;}
+.s2 { color: #ffffff; font-weight: bold;}
+.s3 { color: #d8f69c; font-weight: bold;}
+.s4 { color: #00b580; font-weight: bold;}
+.s5 { color: #f971bb;}
+.s6 { color: #cc7832;}
+.s7 { color: #9bc28e; font-weight: bold;}
+.s8 { color: #d2c200; font-weight: bold;}
+.s9 { color: #ff6666;}
+</style>
+</head>
+<body bgcolor="#404040">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+Hand_Strengths.py</font>
+</center></td></tr></table>
+<pre><span class="s0">from </span><span class="s1">collections </span><span class="s0">import </span><span class="s1">Counter</span>
+
+card_vals <span class="s2">= </span><span class="s3">{</span>
+    <span class="s4">'A'</span><span class="s2">: </span><span class="s5">14</span><span class="s6">,</span>
+    <span class="s4">'2'</span><span class="s2">: </span><span class="s5">2</span><span class="s6">,</span>
+    <span class="s4">'3'</span><span class="s2">: </span><span class="s5">3</span><span class="s6">,</span>
+    <span class="s4">'4'</span><span class="s2">: </span><span class="s5">4</span><span class="s6">,</span>
+    <span class="s4">'5'</span><span class="s2">: </span><span class="s5">5</span><span class="s6">,</span>
+    <span class="s4">'6'</span><span class="s2">: </span><span class="s5">6</span><span class="s6">,</span>
+    <span class="s4">'7'</span><span class="s2">: </span><span class="s5">7</span><span class="s6">,</span>
+    <span class="s4">'8'</span><span class="s2">: </span><span class="s5">8</span><span class="s6">,</span>
+    <span class="s4">'9'</span><span class="s2">: </span><span class="s5">9</span><span class="s6">,</span>
+    <span class="s4">'T'</span><span class="s2">: </span><span class="s5">10</span><span class="s6">,</span>
+    <span class="s4">'J'</span><span class="s2">: </span><span class="s5">11</span><span class="s6">,</span>
+    <span class="s4">'Q'</span><span class="s2">: </span><span class="s5">12</span><span class="s6">,</span>
+    <span class="s4">'K'</span><span class="s2">: </span><span class="s5">13</span>
+<span class="s3">}</span>
+<span class="s1">card_vals_al </span><span class="s2">= </span><span class="s3">{</span>
+    <span class="s4">'A'</span><span class="s2">: </span><span class="s5">1</span><span class="s6">,</span>
+    <span class="s4">'2'</span><span class="s2">: </span><span class="s5">2</span><span class="s6">,</span>
+    <span class="s4">'3'</span><span class="s2">: </span><span class="s5">3</span><span class="s6">,</span>
+    <span class="s4">'4'</span><span class="s2">: </span><span class="s5">4</span><span class="s6">,</span>
+    <span class="s4">'5'</span><span class="s2">: </span><span class="s5">5</span><span class="s6">,</span>
+    <span class="s4">'6'</span><span class="s2">: </span><span class="s5">6</span><span class="s6">,</span>
+    <span class="s4">'7'</span><span class="s2">: </span><span class="s5">7</span><span class="s6">,</span>
+    <span class="s4">'8'</span><span class="s2">: </span><span class="s5">8</span><span class="s6">,</span>
+    <span class="s4">'9'</span><span class="s2">: </span><span class="s5">9</span><span class="s6">,</span>
+    <span class="s4">'T'</span><span class="s2">: </span><span class="s5">10</span><span class="s6">,</span>
+    <span class="s4">'J'</span><span class="s2">: </span><span class="s5">11</span><span class="s6">,</span>
+    <span class="s4">'Q'</span><span class="s2">: </span><span class="s5">12</span><span class="s6">,</span>
+    <span class="s4">'K'</span><span class="s2">: </span><span class="s5">13</span>
+<span class="s3">}</span>
+
+
+<span class="s0">def </span><span class="s1">is_straight_flush</span><span class="s7">(</span><span class="s1">cards</span><span class="s2">: </span><span class="s1">list</span><span class="s7">)</span><span class="s2">:</span>
+    <span class="s8">&quot;&quot;&quot; Returns True if there are 5 sequential cards of the same suit in the seven cards passed to the function. &quot;&quot;&quot;</span>
+    <span class="s0">assert </span><span class="s1">len</span><span class="s7">(</span><span class="s1">cards</span><span class="s7">) </span><span class="s2">== </span><span class="s5">7  </span><span class="s9"># Replace with custom error!!!</span>
+    <span class="s1">suits </span><span class="s2">= [</span><span class="s1">c</span><span class="s2">[</span><span class="s5">1</span><span class="s2">] </span><span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">cards</span><span class="s2">]</span>
+    <span class="s1">common_suit </span><span class="s2">= </span><span class="s1">Counter</span><span class="s7">(</span><span class="s1">suits</span><span class="s7">)</span><span class="s1">.most_common</span><span class="s7">(</span><span class="s5">1</span><span class="s7">)</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s5">0</span><span class="s2">]</span>
+    <span class="s1">cards_of_common_suit </span><span class="s2">= [</span><span class="s1">c </span><span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">cards </span><span class="s0">if </span><span class="s1">c</span><span class="s2">[</span><span class="s5">1</span><span class="s2">] == </span><span class="s1">common_suit</span><span class="s2">]</span>
+    <span class="s0">if </span><span class="s1">len</span><span class="s7">(</span><span class="s1">cards_of_common_suit</span><span class="s7">) </span><span class="s2">&lt; </span><span class="s5">5</span><span class="s2">:</span>
+        <span class="s0">return False</span>
+    <span class="s1">values </span><span class="s2">= []</span>
+    <span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">cards_of_common_suit</span><span class="s2">:</span>
+        <span class="s1">values.append</span><span class="s7">(</span><span class="s1">card_vals_al</span><span class="s2">[</span><span class="s1">c</span><span class="s2">[</span><span class="s5">0</span><span class="s2">]]</span><span class="s7">)</span>
+    <span class="s1">values </span><span class="s2">= </span><span class="s1">sorted</span><span class="s7">(</span><span class="s1">values</span><span class="s7">)</span>
+    <span class="s1">split_values </span><span class="s2">= []</span>
+    <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range</span><span class="s7">(</span><span class="s1">len</span><span class="s7">(</span><span class="s1">values</span><span class="s7">) </span><span class="s2">- </span><span class="s5">4</span><span class="s7">)</span><span class="s2">:</span>
+        <span class="s1">split_values.append</span><span class="s7">(</span><span class="s1">values</span><span class="s2">[</span><span class="s1">i</span><span class="s2">:</span><span class="s1">i</span><span class="s2">+</span><span class="s5">5</span><span class="s2">]</span><span class="s7">)</span>
+    <span class="s0">for </span><span class="s1">five_card_run </span><span class="s0">in </span><span class="s1">split_values</span><span class="s2">:</span>
+        <span class="s0">if </span><span class="s1">five_card_run</span><span class="s2">[-</span><span class="s5">1</span><span class="s2">] - </span><span class="s1">five_card_run</span><span class="s2">[</span><span class="s5">0</span><span class="s2">] == </span><span class="s5">4</span><span class="s2">:</span>
+            <span class="s0">return True</span>
+    <span class="s1">values </span><span class="s2">= []</span>
+    <span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">cards_of_common_suit</span><span class="s2">:</span>
+        <span class="s1">values.append</span><span class="s7">(</span><span class="s1">card_vals</span><span class="s2">[</span><span class="s1">c</span><span class="s2">[</span><span class="s5">0</span><span class="s2">]]</span><span class="s7">)</span>
+    <span class="s1">values </span><span class="s2">= </span><span class="s1">sorted</span><span class="s7">(</span><span class="s1">values</span><span class="s7">)</span>
+    <span class="s1">split_values </span><span class="s2">= []</span>
+    <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range</span><span class="s7">(</span><span class="s1">len</span><span class="s7">(</span><span class="s1">values</span><span class="s7">) </span><span class="s2">- </span><span class="s5">4</span><span class="s7">)</span><span class="s2">:</span>
+        <span class="s1">split_values.append</span><span class="s7">(</span><span class="s1">values</span><span class="s2">[</span><span class="s1">i</span><span class="s2">:</span><span class="s1">i</span><span class="s2">+</span><span class="s5">5</span><span class="s2">]</span><span class="s7">)</span>
+    <span class="s0">for </span><span class="s1">five_card_run </span><span class="s0">in </span><span class="s1">split_values</span><span class="s2">:</span>
+        <span class="s0">if </span><span class="s1">five_card_run</span><span class="s2">[-</span><span class="s5">1</span><span class="s2">] - </span><span class="s1">five_card_run</span><span class="s2">[</span><span class="s5">0</span><span class="s2">] == </span><span class="s5">4</span><span class="s2">:</span>
+            <span class="s0">return True</span>
+    return False
+
+
+def <span class="s1">is_quads</span><span class="s7">(</span><span class="s1">cards</span><span class="s2">: </span><span class="s1">list</span><span class="s7">)</span><span class="s2">:</span>
+    <span class="s8">&quot;&quot;&quot; Returns True if there are 4 or more cards of the same value in the seven cards passed to the function. Assumes 
+    that all stronger hand classes have been discounted, therefore does not check for straight flushes.&quot;&quot;&quot;</span>
+    <span class="s0">assert </span><span class="s1">len</span><span class="s7">(</span><span class="s1">cards</span><span class="s7">) </span><span class="s2">== </span><span class="s5">7</span>
+    <span class="s1">values </span><span class="s2">= [</span><span class="s1">c</span><span class="s2">[</span><span class="s5">0</span><span class="s2">] </span><span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">cards</span><span class="s2">]</span>
+    <span class="s1">most_common_val_count </span><span class="s2">= </span><span class="s1">Counter</span><span class="s7">(</span><span class="s1">values</span><span class="s7">)</span><span class="s1">.most_common</span><span class="s7">(</span><span class="s5">1</span><span class="s7">)</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s5">1</span><span class="s2">]</span>
+    <span class="s0">if </span><span class="s1">most_common_val_count </span><span class="s2">!= </span><span class="s5">4</span><span class="s2">:</span>
+        <span class="s0">return False</span>
+    return True
+
+
+def <span class="s1">is_full_house</span><span class="s7">(</span><span class="s1">cards</span><span class="s2">: </span><span class="s1">list</span><span class="s7">)</span><span class="s2">:</span>
+    <span class="s8">&quot;&quot;&quot; Returns True if there 3 of the most common card, and either 2 or 3 of the second most common card in the seven 
+    cards passed to the function. Assumes that all stronger hand classes have been discounted, therefore does not check 
+    for straight flushes, quads. &quot;&quot;&quot;</span>
+    <span class="s0">assert </span><span class="s1">len</span><span class="s7">(</span><span class="s1">cards</span><span class="s7">) </span><span class="s2">== </span><span class="s5">7</span>
+    <span class="s1">values </span><span class="s2">= [</span><span class="s1">c</span><span class="s2">[</span><span class="s5">0</span><span class="s2">] </span><span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">cards</span><span class="s2">]</span>
+    <span class="s1">most_common_val_count </span><span class="s2">= </span><span class="s1">Counter</span><span class="s7">(</span><span class="s1">values</span><span class="s7">)</span><span class="s1">.most_common</span><span class="s7">(</span><span class="s5">1</span><span class="s7">)</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s5">1</span><span class="s2">]</span>
+    <span class="s0">if </span><span class="s1">most_common_val_count </span><span class="s2">!= </span><span class="s5">3</span><span class="s2">:</span>
+        <span class="s0">return False</span>
+    <span class="s1">values </span><span class="s2">= [</span><span class="s1">v </span><span class="s0">for </span><span class="s1">v </span><span class="s0">in </span><span class="s1">values </span><span class="s0">if </span><span class="s1">v </span><span class="s2">!= </span><span class="s1">Counter</span><span class="s7">(</span><span class="s1">values</span><span class="s7">)</span><span class="s1">.most_common</span><span class="s7">(</span><span class="s5">1</span><span class="s7">)</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s5">0</span><span class="s2">]]</span>
+    <span class="s1">second_most_common_val_count </span><span class="s2">= </span><span class="s1">Counter</span><span class="s7">(</span><span class="s1">values</span><span class="s7">)</span><span class="s1">.most_common</span><span class="s7">(</span><span class="s5">1</span><span class="s7">)</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s5">1</span><span class="s2">]</span>
+    <span class="s0">if </span><span class="s1">second_most_common_val_count </span><span class="s0">not in </span><span class="s2">[</span><span class="s5">2</span><span class="s6">, </span><span class="s5">3</span><span class="s2">]:</span>
+        <span class="s0">return False</span>
+    return True
+
+
+def <span class="s1">is_flush</span><span class="s7">(</span><span class="s1">cards</span><span class="s2">: </span><span class="s1">list</span><span class="s7">)</span><span class="s2">:</span>
+    <span class="s8">&quot;&quot;&quot; Returns True if there are 5 or more cards of the same suit in the seven cards passed to the function. Assumes 
+    that all stronger hand classes have been discounted, therefore does not check for straight flushes, quads etc. &quot;&quot;&quot;</span>
+    <span class="s0">assert </span><span class="s1">len</span><span class="s7">(</span><span class="s1">cards</span><span class="s7">) </span><span class="s2">== </span><span class="s5">7</span>
+    <span class="s1">suits </span><span class="s2">= [</span><span class="s1">c</span><span class="s2">[</span><span class="s5">1</span><span class="s2">] </span><span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">cards</span><span class="s2">]</span>
+    <span class="s1">most_common_suit_count </span><span class="s2">= </span><span class="s1">Counter</span><span class="s7">(</span><span class="s1">suits</span><span class="s7">)</span><span class="s1">.most_common</span><span class="s7">(</span><span class="s5">1</span><span class="s7">)</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s5">1</span><span class="s2">]</span>
+    <span class="s0">if </span><span class="s1">most_common_suit_count </span><span class="s2">&lt; </span><span class="s5">5</span><span class="s2">:</span>
+        <span class="s0">return False</span>
+    return True
+
+
+def <span class="s1">is_straight</span><span class="s7">(</span><span class="s1">cards</span><span class="s2">: </span><span class="s1">list</span><span class="s7">)</span><span class="s2">:</span>
+    <span class="s8">&quot;&quot;&quot; Returns True if there are 5 sequential cards in the seven cards passed to the function. Assumes that all 
+    stronger hand classes have been discounted, therefore does not check for straight flushes, quads etc.&quot;&quot;&quot;</span>
+    <span class="s0">assert </span><span class="s1">len</span><span class="s7">(</span><span class="s1">cards</span><span class="s7">) </span><span class="s2">== </span><span class="s5">7</span>
+    <span class="s1">values </span><span class="s2">= []</span>
+    <span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">cards</span><span class="s2">:</span>
+        <span class="s1">values.append</span><span class="s7">(</span><span class="s1">card_vals_al</span><span class="s2">[</span><span class="s1">c</span><span class="s2">[</span><span class="s5">0</span><span class="s2">]]</span><span class="s7">)</span>
+    <span class="s1">values </span><span class="s2">= </span><span class="s1">sorted</span><span class="s7">(</span><span class="s1">values</span><span class="s7">)</span>
+    <span class="s1">split_values </span><span class="s2">= []</span>
+    <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range</span><span class="s7">(</span><span class="s5">3</span><span class="s7">)</span><span class="s2">:</span>
+        <span class="s1">split_values.append</span><span class="s7">(</span><span class="s1">values</span><span class="s2">[</span><span class="s1">i</span><span class="s2">:</span><span class="s1">i</span><span class="s2">+</span><span class="s5">5</span><span class="s2">]</span><span class="s7">)</span>
+    <span class="s0">for </span><span class="s1">five_card_run </span><span class="s0">in </span><span class="s1">split_values</span><span class="s2">:</span>
+        <span class="s0">if </span><span class="s1">five_card_run</span><span class="s2">[-</span><span class="s5">1</span><span class="s2">] - </span><span class="s1">five_card_run</span><span class="s2">[</span><span class="s5">0</span><span class="s2">] == </span><span class="s5">4 </span><span class="s0">and </span><span class="s1">len</span><span class="s7">(</span><span class="s1">five_card_run</span><span class="s7">) </span><span class="s2">== </span><span class="s1">len</span><span class="s7">(</span><span class="s1">set</span><span class="s7">(</span><span class="s1">five_card_run</span><span class="s7">))</span><span class="s2">:</span>
+            <span class="s0">return True</span>
+    <span class="s1">values </span><span class="s2">= []</span>
+    <span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">cards</span><span class="s2">:</span>
+        <span class="s1">values.append</span><span class="s7">(</span><span class="s1">card_vals</span><span class="s2">[</span><span class="s1">c</span><span class="s2">[</span><span class="s5">0</span><span class="s2">]]</span><span class="s7">)</span>
+    <span class="s1">values </span><span class="s2">= </span><span class="s1">sorted</span><span class="s7">(</span><span class="s1">values</span><span class="s7">)</span>
+    <span class="s1">split_values </span><span class="s2">= []</span>
+    <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range</span><span class="s7">(</span><span class="s5">3</span><span class="s7">)</span><span class="s2">:</span>
+        <span class="s1">split_values.append</span><span class="s7">(</span><span class="s1">values</span><span class="s2">[</span><span class="s1">i</span><span class="s2">:</span><span class="s1">i</span><span class="s2">+</span><span class="s5">5</span><span class="s2">]</span><span class="s7">)</span>
+    <span class="s0">for </span><span class="s1">five_card_run </span><span class="s0">in </span><span class="s1">split_values</span><span class="s2">:</span>
+        <span class="s0">if </span><span class="s1">five_card_run</span><span class="s2">[-</span><span class="s5">1</span><span class="s2">] - </span><span class="s1">five_card_run</span><span class="s2">[</span><span class="s5">0</span><span class="s2">] == </span><span class="s5">4 </span><span class="s0">and </span><span class="s1">len</span><span class="s7">(</span><span class="s1">five_card_run</span><span class="s7">) </span><span class="s2">== </span><span class="s1">len</span><span class="s7">(</span><span class="s1">set</span><span class="s7">(</span><span class="s1">five_card_run</span><span class="s7">))</span><span class="s2">:</span>
+            <span class="s0">return True</span>
+    return False
+
+
+def <span class="s1">is_trips</span><span class="s7">(</span><span class="s1">cards</span><span class="s2">: </span><span class="s1">list</span><span class="s7">)</span><span class="s2">:</span>
+    <span class="s8">&quot;&quot;&quot; Returns True if there 3 of the most common card in the seven cards passed to the function. Assumes that all 
+    stronger hand classes have been discounted, therefore does not check for flushes, full houses etc. &quot;&quot;&quot;</span>
+    <span class="s0">assert </span><span class="s1">len</span><span class="s7">(</span><span class="s1">cards</span><span class="s7">) </span><span class="s2">== </span><span class="s5">7</span>
+    <span class="s1">values </span><span class="s2">= [</span><span class="s1">c</span><span class="s2">[</span><span class="s5">0</span><span class="s2">] </span><span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">cards</span><span class="s2">]</span>
+    <span class="s1">most_common_val_count </span><span class="s2">= </span><span class="s1">Counter</span><span class="s7">(</span><span class="s1">values</span><span class="s7">)</span><span class="s1">.most_common</span><span class="s7">(</span><span class="s5">1</span><span class="s7">)</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s5">1</span><span class="s2">]</span>
+    <span class="s0">if </span><span class="s1">most_common_val_count </span><span class="s2">!= </span><span class="s5">3</span><span class="s2">:</span>
+        <span class="s0">return False</span>
+    return True
+
+
+def <span class="s1">is_two_pair</span><span class="s7">(</span><span class="s1">cards</span><span class="s2">: </span><span class="s1">list</span><span class="s7">)</span><span class="s2">:</span>
+    <span class="s8">&quot;&quot;&quot; Returns True if there 2 of the most common card, and 2 of the second most common card in the seven cards passed 
+    to the function. Assumes that all stronger hand classes have been discounted, therefore does not check for straight 
+    flushes, quads. &quot;&quot;&quot;</span>
+    <span class="s0">assert </span><span class="s1">len</span><span class="s7">(</span><span class="s1">cards</span><span class="s7">) </span><span class="s2">== </span><span class="s5">7</span>
+    <span class="s1">values </span><span class="s2">= [</span><span class="s1">c</span><span class="s2">[</span><span class="s5">0</span><span class="s2">] </span><span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">cards</span><span class="s2">]</span>
+    <span class="s1">most_common_val_count </span><span class="s2">= </span><span class="s1">Counter</span><span class="s7">(</span><span class="s1">values</span><span class="s7">)</span><span class="s1">.most_common</span><span class="s7">(</span><span class="s5">1</span><span class="s7">)</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s5">1</span><span class="s2">]</span>
+    <span class="s0">if </span><span class="s1">most_common_val_count </span><span class="s2">!= </span><span class="s5">2</span><span class="s2">:</span>
+        <span class="s0">return False</span>
+    <span class="s1">values </span><span class="s2">= [</span><span class="s1">v </span><span class="s0">for </span><span class="s1">v </span><span class="s0">in </span><span class="s1">values </span><span class="s0">if </span><span class="s1">v </span><span class="s2">!= </span><span class="s1">Counter</span><span class="s7">(</span><span class="s1">values</span><span class="s7">)</span><span class="s1">.most_common</span><span class="s7">(</span><span class="s5">1</span><span class="s7">)</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s5">0</span><span class="s2">]]</span>
+    <span class="s1">second_most_common_val_count </span><span class="s2">= </span><span class="s1">Counter</span><span class="s7">(</span><span class="s1">values</span><span class="s7">)</span><span class="s1">.most_common</span><span class="s7">(</span><span class="s5">1</span><span class="s7">)</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s5">1</span><span class="s2">]</span>
+    <span class="s0">if </span><span class="s1">second_most_common_val_count </span><span class="s2">!= </span><span class="s5">2</span><span class="s2">:</span>
+        <span class="s0">return False</span>
+    return True
+
+
+def <span class="s1">is_pair</span><span class="s7">(</span><span class="s1">cards</span><span class="s2">: </span><span class="s1">list</span><span class="s7">)</span><span class="s2">:</span>
+    <span class="s8">&quot;&quot;&quot; Returns True if there 2 of the most common card in the seven cards passed to the function. Assumes that all 
+    stronger hand classes have been discounted, therefore does not check for flushes, full houses etc. &quot;&quot;&quot;</span>
+    <span class="s0">assert </span><span class="s1">len</span><span class="s7">(</span><span class="s1">cards</span><span class="s7">) </span><span class="s2">== </span><span class="s5">7</span>
+    <span class="s1">values </span><span class="s2">= [</span><span class="s1">c</span><span class="s2">[</span><span class="s5">0</span><span class="s2">] </span><span class="s0">for </span><span class="s1">c </span><span class="s0">in </span><span class="s1">cards</span><span class="s2">]</span>
+    <span class="s1">most_common_val_count </span><span class="s2">= </span><span class="s1">Counter</span><span class="s7">(</span><span class="s1">values</span><span class="s7">)</span><span class="s1">.most_common</span><span class="s7">(</span><span class="s5">1</span><span class="s7">)</span><span class="s2">[</span><span class="s5">0</span><span class="s2">][</span><span class="s5">1</span><span class="s2">]</span>
+    <span class="s0">if </span><span class="s1">most_common_val_count </span><span class="s2">!= </span><span class="s5">2</span><span class="s2">:</span>
+        <span class="s0">return False</span>
+    return True
+
+
+def <span class="s1">tests</span><span class="s7">()</span><span class="s2">:</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_straight_flush</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'7c'</span><span class="s6">, </span><span class="s4">'Ac'</span><span class="s6">, </span><span class="s4">'Qc'</span><span class="s6">, </span><span class="s4">'Tc'</span><span class="s6">, </span><span class="s4">'3c'</span><span class="s6">, </span><span class="s4">'4c'</span><span class="s6">, </span><span class="s4">'Jc'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># False</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_straight_flush</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'2c'</span><span class="s6">, </span><span class="s4">'Ac'</span><span class="s6">, </span><span class="s4">'5c'</span><span class="s6">, </span><span class="s4">'Tc'</span><span class="s6">, </span><span class="s4">'3c'</span><span class="s6">, </span><span class="s4">'4c'</span><span class="s6">, </span><span class="s4">'Jd'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># True</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_straight_flush</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'Kd'</span><span class="s6">, </span><span class="s4">'Ac'</span><span class="s6">, </span><span class="s4">'Qc'</span><span class="s6">, </span><span class="s4">'Tc'</span><span class="s6">, </span><span class="s4">'3c'</span><span class="s6">, </span><span class="s4">'4c'</span><span class="s6">, </span><span class="s4">'Jc'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># False</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_quads</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'Qc'</span><span class="s6">, </span><span class="s4">'Qs'</span><span class="s6">, </span><span class="s4">'Qd'</span><span class="s6">, </span><span class="s4">'Qh'</span><span class="s6">, </span><span class="s4">'Kh'</span><span class="s6">, </span><span class="s4">'Kc'</span><span class="s6">, </span><span class="s4">'Jd'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># True</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_quads</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'Qc'</span><span class="s6">, </span><span class="s4">'Qs'</span><span class="s6">, </span><span class="s4">'Qd'</span><span class="s6">, </span><span class="s4">'Ks'</span><span class="s6">, </span><span class="s4">'Kh'</span><span class="s6">, </span><span class="s4">'Kc'</span><span class="s6">, </span><span class="s4">'Jd'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># False</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_flush</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'Qc'</span><span class="s6">, </span><span class="s4">'8s'</span><span class="s6">, </span><span class="s4">'Qs'</span><span class="s6">, </span><span class="s4">'Kc'</span><span class="s6">, </span><span class="s4">'Kd'</span><span class="s6">, </span><span class="s4">'Ks'</span><span class="s6">, </span><span class="s4">'Js'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># False</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_flush</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'Qc'</span><span class="s6">, </span><span class="s4">'8s'</span><span class="s6">, </span><span class="s4">'Qs'</span><span class="s6">, </span><span class="s4">'Kc'</span><span class="s6">, </span><span class="s4">'Ts'</span><span class="s6">, </span><span class="s4">'Ks'</span><span class="s6">, </span><span class="s4">'Js'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># True</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_straight</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'Tc'</span><span class="s6">, </span><span class="s4">'8s'</span><span class="s6">, </span><span class="s4">'Qs'</span><span class="s6">, </span><span class="s4">'9c'</span><span class="s6">, </span><span class="s4">'Kd'</span><span class="s6">, </span><span class="s4">'Ks'</span><span class="s6">, </span><span class="s4">'Js'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># True</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_straight</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'Tc'</span><span class="s6">, </span><span class="s4">'8s'</span><span class="s6">, </span><span class="s4">'Qs'</span><span class="s6">, </span><span class="s4">'Jc'</span><span class="s6">, </span><span class="s4">'Kd'</span><span class="s6">, </span><span class="s4">'Ks'</span><span class="s6">, </span><span class="s4">'Js'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># False</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_trips</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'Tc'</span><span class="s6">, </span><span class="s4">'8s'</span><span class="s6">, </span><span class="s4">'Qs'</span><span class="s6">, </span><span class="s4">'9c'</span><span class="s6">, </span><span class="s4">'Kd'</span><span class="s6">, </span><span class="s4">'Ks'</span><span class="s6">, </span><span class="s4">'Js'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># False</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_trips</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'Kc'</span><span class="s6">, </span><span class="s4">'8s'</span><span class="s6">, </span><span class="s4">'Qs'</span><span class="s6">, </span><span class="s4">'9c'</span><span class="s6">, </span><span class="s4">'Kd'</span><span class="s6">, </span><span class="s4">'Ks'</span><span class="s6">, </span><span class="s4">'Js'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># True</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_two_pair</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'Tc'</span><span class="s6">, </span><span class="s4">'8s'</span><span class="s6">, </span><span class="s4">'Qs'</span><span class="s6">, </span><span class="s4">'9c'</span><span class="s6">, </span><span class="s4">'Kd'</span><span class="s6">, </span><span class="s4">'Ks'</span><span class="s6">, </span><span class="s4">'Js'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># False</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_two_pair</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'Jc'</span><span class="s6">, </span><span class="s4">'8s'</span><span class="s6">, </span><span class="s4">'Qs'</span><span class="s6">, </span><span class="s4">'9c'</span><span class="s6">, </span><span class="s4">'Kd'</span><span class="s6">, </span><span class="s4">'Ks'</span><span class="s6">, </span><span class="s4">'Js'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># True</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_pair</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'Tc'</span><span class="s6">, </span><span class="s4">'8s'</span><span class="s6">, </span><span class="s4">'Qs'</span><span class="s6">, </span><span class="s4">'9c'</span><span class="s6">, </span><span class="s4">'Kd'</span><span class="s6">, </span><span class="s4">'Ks'</span><span class="s6">, </span><span class="s4">'Js'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># True</span>
+    <span class="s1">print</span><span class="s7">(</span><span class="s1">is_pair</span><span class="s7">(</span><span class="s2">[</span><span class="s4">'Tc'</span><span class="s6">, </span><span class="s4">'8s'</span><span class="s6">, </span><span class="s4">'Qs'</span><span class="s6">, </span><span class="s4">'9c'</span><span class="s6">, </span><span class="s4">'Kd'</span><span class="s6">, </span><span class="s4">'As'</span><span class="s6">, </span><span class="s4">'Js'</span><span class="s2">]</span><span class="s7">))  </span><span class="s9"># False</span>
+</pre>
+</body>
+</html>
